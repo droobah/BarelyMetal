@@ -1,8 +1,6 @@
 {
   self,
   autovirt,
-  qemu-src,
-  edk2-src,
 }:
 
 {
@@ -12,8 +10,6 @@
       inherit
         self
         autovirt
-        qemu-src
-        edk2-src
         ;
     })
     (import ./looking-glass.nix)

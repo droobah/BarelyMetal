@@ -19,11 +19,31 @@
 
 let
   cpuLower = lib.toLower cpu;
+
+  # The AutoVirt QEMU patches are version-specific — hunks fail to apply
+  # cleanly across major (and often minor) QEMU bumps. Pick the patch by
+  # the nixpkgs QEMU version we're actually building against, and hard-
+  # fail with a useful message if we don't recognize it.
+  #
+  # When nixpkgs bumps QEMU past a version we support, either:
+  #   * bump the AutoVirt input (`nix flake update autovirt`) and add a
+  #     new branch here for the new patch filename, OR
+  #   * temporarily pin nixpkgs' `qemu` to the version below via an
+  #     overlay in your consumer flake.
+  qemuVersion = qemu.version;
+  patchName =
+    if lib.hasPrefix "11." qemuVersion then "v11.0.3"
+    else if lib.hasPrefix "10.2" qemuVersion then "v10.2.0"
+    else throw ''
+      barely-metal-qemu: no AutoVirt patch bundled for nixpkgs QEMU ${qemuVersion}.
+      Update pkgs/qemu/default.nix to add a mapping for this version
+      (available AutoVirt patches: check ${autovirt}/patches/QEMU/).
+    '';
   patchFile =
     if cpuLower == "amd" then
-      "${autovirt}/patches/QEMU/AMD-v10.2.0.patch"
+      "${autovirt}/patches/QEMU/AMD-${patchName}.patch"
     else
-      "${autovirt}/patches/QEMU/Intel-v10.2.0.patch";
+      "${autovirt}/patches/QEMU/Intel-${patchName}.patch";
 
   selectedIdeModel =
     if ideModel != null then ideModel else "Samsung SSD 870 EVO 1TB";

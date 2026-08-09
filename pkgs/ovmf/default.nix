@@ -3,7 +3,6 @@
   stdenv,
   buildPackages,
   autovirt,
-  edk2-src,
   edk2,
   cpu ? "amd",
 
@@ -29,11 +28,27 @@
 
 let
   cpuLower = lib.toLower cpu;
+
+  # AutoVirt EDK2 patches are tag-specific (edk2-stableYYYYMM). Pick the
+  # one that matches whichever edk2 tag nixpkgs is currently shipping so
+  # the patch hunks apply cleanly. Add a new branch here when bumping.
+  #
+  # Nixpkgs' `edk2` sets version like "202602" or "202605-<git-suffix>",
+  # so a lib.hasPrefix check on the year-month is enough.
+  edk2Version = edk2.version;
+  edk2Tag =
+    if lib.hasPrefix "202605" edk2Version then "edk2-stable202605"
+    else if lib.hasPrefix "202602" edk2Version then "edk2-stable202602"
+    else throw ''
+      barely-metal-ovmf: no AutoVirt patch bundled for nixpkgs edk2 ${edk2Version}.
+      Update pkgs/ovmf/default.nix to add a mapping for this tag
+      (available AutoVirt patches: check ${autovirt}/patches/EDK2/).
+    '';
   patchFile =
     if cpuLower == "amd" then
-      "${autovirt}/patches/EDK2/AMD-edk2-stable202602.patch"
+      "${autovirt}/patches/EDK2/AMD-${edk2Tag}.patch"
     else
-      "${autovirt}/patches/EDK2/Intel-edk2-stable202602.patch";
+      "${autovirt}/patches/EDK2/Intel-${edk2Tag}.patch";
 
   pythonEnv = buildPackages.python3.withPackages (ps: [ ps.distlib ]);
   targetArch = "X64";

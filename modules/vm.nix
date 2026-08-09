@@ -1,8 +1,6 @@
 {
   self,
   autovirt,
-  qemu-src,
-  edk2-src,
 }:
 
 {
@@ -120,7 +118,7 @@ let
   };
 
   patchedOvmf = pkgs.callPackage ../pkgs/ovmf {
-    inherit autovirt edk2-src;
+    inherit autovirt;
     cpu = resolvedCpu;
     biosVendor = resolvedBiosVendor;
     biosVersion = resolvedBiosVersion;

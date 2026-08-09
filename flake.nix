@@ -9,15 +9,11 @@
       flake = false;
     };
 
-    qemu-src = {
-      url = "gitlab:qemu-project/qemu/v10.2.0";
-      flake = false;
-    };
-
-    edk2-src = {
-      url = "github:tianocore/edk2/edk2-stable202602";
-      flake = false;
-    };
+    # NOTE: `qemu-src` and `edk2-src` inputs were removed. The QEMU/OVMF
+    # derivations build on top of nixpkgs' own `qemu` / `edk2` packages
+    # (see pkgs/qemu/default.nix and pkgs/ovmf/default.nix), which pin the
+    # source themselves. Version-aware AutoVirt-patch selection lives in
+    # those files, so the version stays glued to whatever nixpkgs ships.
   };
 
   outputs =
@@ -25,8 +21,6 @@
       self,
       nixpkgs,
       autovirt,
-      qemu-src,
-      edk2-src,
     }:
     let
       supportedSystems = [ "x86_64-linux" ];
@@ -40,8 +34,6 @@
           inherit
             self
             autovirt
-            qemu-src
-            edk2-src
             ;
         };
       };
@@ -67,11 +59,11 @@
           };
 
           ovmf-patched = callPackage ./pkgs/ovmf {
-            inherit autovirt edk2-src;
+            inherit autovirt;
             cpu = "amd";
           };
           ovmf-patched-intel = callPackage ./pkgs/ovmf {
-            inherit autovirt edk2-src;
+            inherit autovirt;
             cpu = "intel";
           };
 

@@ -35,7 +35,9 @@ stdenv.mkDerivation {
 
     cp ${autovirt}/resources/scripts/Linux/evdev-auto.sh $out/share/barely-metal/scripts/
     cp ${autovirt}/resources/scripts/Linux/vbios-dumper.sh $out/share/barely-metal/scripts/
-    cp ${autovirt}/resources/scripts/Linux/msr_check.py $out/share/barely-metal/scripts/
+    # AutoVirt removed msr_check.py from resources/scripts/ after commit
+    # 00ec7153. Kept bundled locally so `barely-metal-msr-check` survives.
+    cp ${./msr_check.py} $out/share/barely-metal/scripts/msr_check.py
 
     chmod +x $out/share/barely-metal/scripts/*.sh
 

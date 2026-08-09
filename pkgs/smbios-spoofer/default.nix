@@ -16,7 +16,9 @@ python3.pkgs.buildPythonApplication {
 
   installPhase = ''
     mkdir -p $out/bin $out/share/barely-metal
-    cp ${autovirt}/resources/scripts/Linux/smbios_spoofer_cli.py $out/share/barely-metal/
+    # AutoVirt renamed smbios_spoofer_cli.py -> SMBIOS.py after
+    # commit 00ec7153. Keep the wrapper name stable.
+    cp ${autovirt}/resources/scripts/Linux/SMBIOS.py $out/share/barely-metal/smbios_spoofer_cli.py
     makeWrapper ${python3}/bin/python3 $out/bin/barely-metal-smbios-spoofer \
       --add-flags "$out/share/barely-metal/smbios_spoofer_cli.py"
   '';

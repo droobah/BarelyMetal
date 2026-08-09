@@ -16,8 +16,13 @@ stdenv.mkDerivation {
     mkdir -p $out/share/barely-metal/acpi
 
     # Windows guest anti-detection scripts
-    cp ${autovirt}/resources/scripts/Windows/edid-spoofer.ps1 $out/share/barely-metal/guest-scripts/windows/
-    cp ${autovirt}/resources/scripts/Windows/identifier-spoofer.ps1 $out/share/barely-metal/guest-scripts/windows/
+    #
+    # AutoVirt renamed edid-spoofer.ps1 -> EDID_OVERRIDE.ps1 and dropped
+    # identifier-spoofer.ps1 from resources/scripts/ after commit 00ec7153.
+    # We keep identifier-spoofer.ps1 bundled locally in this package so
+    # BarelyMetal doesn't lose functionality when tracking AutoVirt HEAD.
+    cp ${autovirt}/resources/scripts/Windows/EDID_OVERRIDE.ps1 $out/share/barely-metal/guest-scripts/windows/edid-spoofer.ps1
+    cp ${./identifier-spoofer.ps1} $out/share/barely-metal/guest-scripts/windows/identifier-spoofer.ps1
     cp ${autovirt}/resources/scripts/Windows/qemu-cleanup.ps1 $out/share/barely-metal/guest-scripts/windows/
     cp ${./power-fix.ps1} $out/share/barely-metal/guest-scripts/windows/power-fix.ps1
 

@@ -32,7 +32,12 @@ in
   config = lib.mkIf cfg.enable {
     boot.kernelPatches =
       let
-        svmPatchFile = "${mainCfg._internal.autovirtSrc}/patches/Kernel/linux-6.18.8-svm.patch";
+        # Bundled locally — upstream AutoVirt deleted patches/Kernel/
+        # in favor of routing kernel changes through linux-tkg. Keeping
+        # the .patch file inside BarelyMetal means it survives further
+        # AutoVirt refactors. `../patches/...` is a path literal, so Nix
+        # copies it into the store automatically.
+        svmPatchFile = ../patches/kernel/linux-6.18.8-svm.patch;
       in
       lib.optional cfg.svmPatch {
         name = "barely-metal-svm-antidetection";

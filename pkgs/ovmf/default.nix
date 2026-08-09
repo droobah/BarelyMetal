@@ -50,12 +50,21 @@ let
     else
       "${autovirt}/patches/EDK2/Intel-${edk2Tag}.patch";
 
+  # EDK2 renamed the GCC toolchain family in edk2-stable202502 — the old
+  # "GCC5" identifier and its GCC5_X64_PREFIX env var were removed and
+  # everything is now just "GCC" / GCC_X64_PREFIX. Both tags we currently
+  # support (202602, 202605) are post-rename, so it's plain "GCC" for
+  # both. If an older EDK2 tag ever gets added to the map above, this
+  # picker needs an extra branch for it.
+  gccToolchain = "GCC";
+  gccPrefixEnv = "${gccToolchain}_X64_PREFIX";
+
   pythonEnv = buildPackages.python3.withPackages (ps: [ ps.distlib ]);
   targetArch = "X64";
 in
 stdenv.mkDerivation {
   pname = "barely-metal-ovmf";
-  version = "202602-barely-metal";
+  version = "${edk2Version}-barely-metal";
 
   src = edk2.src;
 
@@ -76,7 +85,7 @@ stdenv.mkDerivation {
     "fortify"
   ];
 
-  env.GCC5_X64_PREFIX = stdenv.cc.targetPrefix;
+  env.${gccPrefixEnv} = stdenv.cc.targetPrefix;
 
   prePatch = ''
     rm -rf BaseTools
@@ -154,7 +163,7 @@ stdenv.mkDerivation {
     build \
       -p OvmfPkg/OvmfPkgX64.dsc \
       -a ${targetArch} \
-      -t GCC5 \
+      -t ${gccToolchain} \
       -b RELEASE \
       -n $NIX_BUILD_CORES \
       -s \
@@ -172,9 +181,9 @@ stdenv.mkDerivation {
     runHook preInstall
 
     mkdir -p $out/FV
-    cp -v Build/OvmfX64/RELEASE_GCC5/FV/OVMF_CODE.fd $out/FV/
-    cp -v Build/OvmfX64/RELEASE_GCC5/FV/OVMF_VARS.fd $out/FV/
-    cp -v Build/OvmfX64/RELEASE_GCC5/FV/OVMF.fd $out/FV/
+    cp -v Build/OvmfX64/RELEASE_${gccToolchain}/FV/OVMF_CODE.fd $out/FV/
+    cp -v Build/OvmfX64/RELEASE_${gccToolchain}/FV/OVMF_VARS.fd $out/FV/
+    cp -v Build/OvmfX64/RELEASE_${gccToolchain}/FV/OVMF.fd $out/FV/
 
     runHook postInstall
   '';
